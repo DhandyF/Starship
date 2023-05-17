@@ -46,7 +46,7 @@ function getOtherPokemon() {
 
 window.onscroll = () => {
   let reachBottom = document.documentElement.scrollTop + window.innerHeight
-    >= document.documentElement.offsetHeight - 10;
+    >= document.documentElement.offsetHeight;
 
   if (reachBottom) {
     getOtherPokemon();

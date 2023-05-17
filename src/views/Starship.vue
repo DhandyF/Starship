@@ -1,38 +1,38 @@
 <script setup>
 import { ref, reactive, onMounted, computed, defineAsyncComponent } from 'vue';
 
-const Details = defineAsyncComponent(() => import('../components/DetailsPokemon.vue'));
+const Details = defineAsyncComponent(() => import('../components/DetailsStarship.vue'));
 
-const baseUrl = 'https://pokeapi.co/api/v2/pokemon/'
+const baseUrl = 'https://swapi.dev/api/starships/'
 const data = reactive({});
-const pokemonList = ref([]);
-const pokemonName = ref('');
+const starshipList = ref([]);
+const starshipName = ref('');
 
 const isFound = computed(() => {
-  return pokemonList.value.length > 0;
+  return starshipList.value.length > 0;
 })
 
 onMounted( async() => {
-  await getPokemon(baseUrl);
+  await getStarship(baseUrl);
 });
 
-async function getPokemon(url) {
+async function getStarship(url) {
   await fetch(url, {
     method: 'GET'
   }).then( async(res) => {
     data.value = await res.json();
-    data.value.results.forEach(pokemon => {
-      pokemonList.value.push(pokemon);
+    data.value.results.forEach(starship => {
+      starshipList.value.push(starship);
     });
 
     if (hasSpace()) {
-      getOtherPokemon();
+      getOtherStarship();
     }
 
-    // console.log(data.value);
-    // console.log('list', pokemonList.value);
+    console.log(data.value);
+    console.log('list', starshipList.value);
   }).catch((err) => {
-    pokemonList.value = [];
+    starshipList.value = [];
     console.log(err);
   })
 }
@@ -41,48 +41,52 @@ function hasSpace() {
   return document.body.scrollHeight <= window.innerHeight;
 }
 
-function getOtherPokemon() {
+function getOtherStarship() {
   let isHasNext = data.value.next !== null;
   if (isHasNext) {
-    getPokemon(data.value.next);
+    getStarship(data.value.next);
   }
 }
 
 window.onscroll = () => {
   let reachBottom = document.documentElement.scrollTop + window.innerHeight
-    >= document.documentElement.offsetHeight - 10;
+    >= document.documentElement.offsetHeight;
 
   if (reachBottom) {
-    getOtherPokemon();
+    getOtherStarship();
   }
 }
 
 const isShowDetail = ref(false);
-const selectedPokemon = reactive({});
+const selectedStarship = reactive({});
 
-function getDetail(pokemon) {
+function getDetail(starship) {
   isShowDetail.value = true;
-  selectedPokemon.value = pokemon;
+  selectedStarship.value = starship;
 }
 
 function hideDetail() {
   isShowDetail.value = false;
 }
 
-async function searchPokemon() {
-  if (pokemonName.value === '') {
-    pokemonList.value = [];
-    await getPokemon(baseUrl);
+async function searchStarship() {
+  if (starshipName.value === '') {
+    starshipList.value = [];
+    await getStarship(baseUrl);
   } else {
-    await fetch(`${baseUrl}${pokemonName.value.toLocaleLowerCase()}/`, {
+    console.log(`${baseUrl}?search=${starshipName.value}`);
+    await fetch(`${baseUrl}?search=${starshipName.value}`, {
       method: 'GET'
     }).then( async(res) => {
       const response = await res.json();
-      pokemonList.value = [];
-      pokemonList.value.push(response);
+      starshipList.value = [];
+      
+      response.results.forEach(starship => {
+        starshipList.value.push(starship);
+      });
       console.log(response);
     }).catch((err) => {
-      pokemonList.value = [];
+      starshipList.value = [];
       console.log(err);
     })
   }
@@ -90,7 +94,7 @@ async function searchPokemon() {
 
 function eventEnter(event) {
   if (event.key === 'Enter') {
-    searchPokemon();
+    searchStarship();
   }
 }
 </script>
@@ -101,70 +105,48 @@ function eventEnter(event) {
       <input
         class="search-field"
         type="text"
-        v-model="pokemonName"
+        v-model="starshipName"
         placeholder="Find your Starship"
         @keyup="eventEnter"
       >
       <button
         class="search-btn"
-        @click="searchPokemon"
+        @click="searchStarship"
       >
         Search
       </button>
     </div>
     <div class="content">
+      <div class="header">
+        <div class="col">Name</div>
+        <div class="col">Model</div>
+        <div class="col">Starship Class</div>
+        <div class="col">MGLT</div>
+        <div class="col">Cost</div>
+      </div>
       <div
+        v-for="starship in starshipList"
+        :key="starship.name"
         class="items"
-        v-for="(pokemon) in pokemonList"
-        :key="pokemon"
-        @click="getDetail(pokemon)"
+        @click="getDetail(starship)"
       >
-        <div>{{ pokemon.name }}</div>
+        <div class="col">{{ starship.name }}</div>
+        <div class="col">{{ starship.model}}</div>
+        <div class="col">{{ starship.starship_class}}</div>
+        <div class="col">{{ starship.MGLT }}</div>
+        <div class="col">{{ starship.cost_in_credits}}</div>
       </div>
     </div>
     <div
       v-if="!isFound"
       class="not-found"
     >
-      &#9888; Pokemon Not Found &#9888;
+      &#9888; Starship Not Found &#9888;
     </div>
-    <!-- <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Model</th>
-          <th>Crew</th>
-          <th>MGLT</th>
-          <th>Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="index in 5" :key="index">
-          <td>aaa</td>
-          <td>vvvv</td>
-          <td>5</td>
-          <td>100</td>
-          <td>10.000</td>
-        </tr>
-      </tbody>
-    </table> -->
-    <!-- <div class="header">
-      <div class="col">Name</div>
-      <div class="col">Model</div>
-      <div class="col">Crew</div>
-      <div class="col">MGLT</div>
-      <div class="col">Price</div>
-    </div>
-    <div v-for="index in 3" :key="index" class="items">
-      <div class="col">aaa</div>
-      <div class="col">vvv</div>
-      <div class="col">5</div>
-      <div class="col">100</div>
-      <div class="col">10.000</div>
-    </div> -->
+
     <Details
       v-if="isShowDetail"
-      :pokemon="selectedPokemon.value"
+      :starship="selectedStarship.value"
       @close="hideDetail"
     />
   </div>
@@ -172,17 +154,14 @@ function eventEnter(event) {
 
 <style scoped>
 .container {
-  /* margin-top: 40px; */
-  /* display: flex;
-  flex-wrap: wrap; */
   margin: 40px 60px;
   font-family: 'Trebuchet MS', sans-serif;
-  /* font-family: 'Comic Sans MS', sans-serif; */
   font-size: 14px;
 }
 
 .search {
   width: 100%;
+  min-width: 320px;
   margin-bottom: 30px;
 }
 
@@ -220,23 +199,8 @@ function eventEnter(event) {
 }
 
 .content {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.items {
-  display: flex;
-  height: 40px;
-  width: 18%;
-  min-width: 150px;
-  margin: 10px;
-  align-items: center;
-  justify-content: center;
-  text-transform: capitalize;
-  border: 2px solid #bff5d4;
-  border-radius: 5px;
-  background-color: white;
-  cursor: pointer;
+  /* display: flex;
+  flex-wrap: wrap; */
 }
 
 .not-found {
@@ -248,21 +212,7 @@ function eventEnter(event) {
   justify-content: center;
 }
 
-/* table {
-  width: 100%;
-  padding: 0 60px;
-  border-spacing: 0px;
-  font-family: 'Trebuchet MS', sans-serif;
-}
-
-td {
-  height: 50px;
-  margin-bottom: 20px;
-  background-color: white;
-  cursor: pointer;
-} */
-
-/* .header {
+.header {
   display: flex;
   margin-bottom: 10px;
   padding: 0 20px;
@@ -272,44 +222,24 @@ td {
 .items {
   display: flex;
   height: 50px;
+  min-width: 620px;
   margin-bottom: 15px;
   padding: 0 20px;
   align-items: center;
+  border: 2px solid #bff5d4;
   background-color: white;
   cursor: pointer;
 }
   
-  .col {
-    width: 20%;
-  } */
+.col {
+  width: 20%;
+  min-width: 118px;
+}
 
 .items:hover {
   background-color: #BFF0F5;
   box-shadow: 0px 0px 15px 2px rgba(191,240,245,1);
   -webkit-box-shadow: 0px 0px 15px 2px rgba(191,240,245,1);
   -moz-box-shadow: 0px 0px 15px 2px rgba(191,240,245,1);
-}
-
-@media (max-width: 485px) {
-  .container {
-    margin: 40px 30px;
-  }
-
-  .search {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .content {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 368px) {
-  .search-field {
-    margin-bottom: 10px;
-  }
 }
 </style>

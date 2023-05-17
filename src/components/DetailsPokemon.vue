@@ -18,13 +18,6 @@ async function fetchDetail() {
     pokemonDetails.value = response;
     console.log(response);
   })
-
-  await fetch('https://pokeapi.co/api/v2/ability/66/', {
-    method: 'GET'
-  }).then( async(res) => {
-    let response = await res.json();
-    console.log('ability', response);
-  })
 }
 
 function typeColor(type) {
