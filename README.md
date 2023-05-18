@@ -6,9 +6,9 @@ The starship list is taken from the public API [Starship](https://swapi.dev/api)
 
 ## Screenshot
 
-![Starship](assets/images/ss_starship.png)
+![Starship](./src/assets/images/ss_starship.png)
 
-![Detail](assets/images/ss_starship.png)
+![Detail](./src//assets/images/ss_starship_details.png)
 
 ## Project Setup
 
