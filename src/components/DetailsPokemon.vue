@@ -1,24 +1,8 @@
 <script setup>
-import { reactive, defineEmits, defineProps, onMounted } from 'vue';
+import { defineEmits, defineProps } from 'vue';
 
 const emit = defineEmits(['close']);
 const props = defineProps(['pokemon']);
-
-onMounted(() => {
-  fetchDetail();
-});
-
-const pokemonDetails = reactive({});
-
-async function fetchDetail() {
-  await fetch(`https://pokeapi.co/api/v2/pokemon/${props.pokemon.name}/`, {
-    method: 'GET'
-  }).then( async(res) => {
-    const response = await res.json();
-    pokemonDetails.value = response;
-    console.log(response);
-  })
-}
 
 function typeColor(type) {
   const COLORS = {
@@ -49,24 +33,21 @@ function typeColor(type) {
 </script>
 
 <template>
-  <div
-    v-if="pokemonDetails.value"
-    class="details-container"
-  >
+  <div class="details-container">
     <div class="backdrop" @click="emit('close')"/>
     <div class="details slide-in">
       <span class="close-btn" @click="emit('close')">X</span>
-      <div class="name">{{ pokemonDetails.value.name }}</div>
+      <div class="name">{{ props.pokemon.name }}</div>
       <div class="image">
         <img
-          :src="pokemonDetails.value.sprites.front_default"
-          :alt="pokemonDetails.value.name"
+          :src="props.pokemon.sprites.front_default"
+          :alt="props.pokemon.name"
         >
       </div>
       <div class="type">
         <div
           class="type-item"
-          v-for="type in pokemonDetails.value.types"
+          v-for="type in props.pokemon.types"
           :key="type.slot"
           :style="typeColor(type.type.name)"
         >
@@ -78,25 +59,25 @@ function typeColor(type) {
           <div class="title">Stats</div>
           <div
             class="stats-item"
-            v-for="stats in pokemonDetails.value.stats" :key="stats"
+            v-for="stats in props.pokemon.stats" :key="stats"
           >
             <div class="stats-name">{{ stats.stat.name }}</div>
             <span>{{ stats.base_stat }}</span>
           </div>
           <div class="stats-item">
             <div class="stats-name">Height</div>
-            <span>{{ pokemonDetails.value.height }}</span>
+            <span class="lowercase">{{ props.pokemon.height }} dm</span>
           </div>
           <div class="stats-item">
             <div class="stats-name">Weight</div>
-            <span>{{ pokemonDetails.value.weight }}</span>
+            <span class="lowercase">{{ props.pokemon.weight }} hg</span>
           </div>
         </div>
         <div class="ability">
           <div class="title">Abilities</div>
           <div
             class="ability-item"
-            v-for="ability in pokemonDetails.value.abilities"
+            v-for="ability in props.pokemon.abilities"
             :key="ability"
           >
             {{ ability.ability.name }}
@@ -218,6 +199,10 @@ function typeColor(type) {
   font-size: 20px;
   font-weight: bold;
   cursor: pointer;
+}
+
+.lowercase {
+  text-transform: lowercase;
 }
 
 @media (max-width: 846px) {

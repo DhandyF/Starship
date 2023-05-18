@@ -1,14 +1,14 @@
-# starship
+# Starship & Pokemon
 
-This template should help get you started developing with Vue 3 in Vite.
+Starship & Pokemon is a simple web application that can display starship list and pokemon list in two different menus. In each menu you can see the details of the selected starship or pokemon.
 
-## Recommended IDE Setup
+The starship list is taken from the public API [Starship](https://swapi.dev/api), while the pokemon list is taken from the public api [Pokemon](https://pokeapi.co/).
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## Screenshot
 
-## Customize configuration
+![Starship](assets/images/ss_starship.png)
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+![Detail](assets/images/ss_starship.png)
 
 ## Project Setup
 

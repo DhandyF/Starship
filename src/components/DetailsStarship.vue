@@ -4,147 +4,94 @@ import { ref, reactive, defineEmits, defineProps, onMounted } from 'vue';
 const emit = defineEmits(['close']);
 const props = defineProps(['starship']);
 
-onMounted(() => {
-  fetchDetail();
-});
-
-const starshipDetails = reactive({});
-
-async function fetchDetail() {
-  console.log('url', props.starship.url);
-  await fetch(`${props.starship.url}`, {
-    method: 'GET'
-  }).then( async(res) => {
-    const response = await res.json();
-    starshipDetails.value = response;
-    console.log('detail', response);
-  })
-
-  if (starshipDetails.value.pilots.length > 0) {
-    getPilots(starshipDetails.value.pilots);
-  }
-
-  if (starshipDetails.value.films.length > 0) {
-    getFilms(starshipDetails.value.films);
-  }
-}
-
-const pilots = ref([]);
-
-async function getPilots(arrayPilot) {
-  pilots.value = [];
-
-  arrayPilot.forEach(async (url) => {
-    await fetch(url, {
-      method: 'GET'
-    }).then( async(res) => {
-      let response = await res.json();
-      pilots.value.push(response);
-    }).catch((err) => console.log(err));
-  });
-  console.log('pilots', pilots.value);
-}
-
-const films = ref([]);
-
-async function getFilms(arrayFilm) {
-  films.value = [];
-
-  arrayFilm.forEach(async (url) => {
-    await fetch(url, {
-      method: 'GET'
-    }).then( async(res) => {
-      let response = await res.json();
-      films.value.push(response);
-    }).catch((err) => console.log(err));
-  });
-
-  console.log('films', films.value);
-}
+const starshipDetails = props.starship;
 </script>
 
 <template>
-  <div
-    v-if="starshipDetails.value"
-    class="details-container"
-  >
+  <div class="details-container">
     <div class="backdrop" @click="emit('close')"/>
     <div class="details slide-in">
       <span class="close-btn" @click="emit('close')">X</span>
-      <div class="name">{{ starshipDetails.value.name }}</div>
+      <div class="name">{{ starshipDetails.name }}</div>
 
       <div class="attributes">
         <div class="title">Details</div>
 
         <div class="attribute-item">
           <div class="attribute-name">Model</div>
-          <span>{{ starshipDetails.value.model }}</span>
+          <span>{{ starshipDetails.model }}</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Starship Class</div>
-          <span>{{ starshipDetails.value.starship_class }}</span>
+          <span>{{ starshipDetails.starship_class }}</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Manufacturer</div>
-          <span>{{ starshipDetails.value.manufacturer }}</span>
+          <span>{{ starshipDetails.manufacturer }}</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">MGLT</div>
-          <span>{{ starshipDetails.value.MGLT }}</span>
+          <span>{{ starshipDetails.MGLT }}</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Max Atmosphering Speed</div>
-          <span>{{ starshipDetails.value.max_atmosphering_speed }}</span>
+          <span>{{ starshipDetails.max_atmosphering_speed }}</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Crew</div>
-          <span>{{ starshipDetails.value.crew }}</span>
+          <span>{{ starshipDetails.crew }} Personel</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Passengers</div>
-          <span>{{ starshipDetails.value.passengers }}</span>
+          <span>{{ starshipDetails.passengers }} People</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Cargo Capacity</div>
-          <span>{{ starshipDetails.value.cargo_capacity }}</span>
+          <span>{{ starshipDetails.cargo_capacity }} Kilograms</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Hyperdrive Rating</div>
-          <span>{{ starshipDetails.value.hyperdrive_rating }}</span>
+          <span>{{ starshipDetails.hyperdrive_rating }}</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Length</div>
-          <span>{{ starshipDetails.value.length }}</span>
+          <span>{{ starshipDetails.length }} meters</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name">Consumables</div>
-          <span>{{ starshipDetails.value.consumables }}</span>
+          <span>{{ starshipDetails.consumables }}</span>
         </div>
         <div class="attribute-item">
           <div class="attribute-name"><b>Cost</b></div>
-          <span><b>{{ starshipDetails.value.cost_in_credits }}</b></span>
+          <span><b>{{ starshipDetails.cost_in_credits }}</b> Galactic credits</span>
         </div>
       </div>
 
       <div class="other-info">
-        <div class="pilot">
-          <div class="title">Pilots</div>
-          <div
-            class="pilot-item"
-            v-for="pilot in pilots"
-            :key="pilot.url"
-          >
-            {{ pilot.name }}
-          </div>
-        </div>
         <div class="film">
           <div class="title">Films</div>
           <div
             class="film-item"
-            v-for="film in films"
+            v-for="film in starshipDetails.films_detail"
             :key="film.url"
           >
             {{ film.title }}
+          </div>
+          <div v-if="starshipDetails.films_detail.length === 0">
+            <span class="film-item">No Film</span>
+          </div>
+        </div>
+        <div class="pilot">
+          <div class="title">Pilots</div>
+          <div
+            class="pilot-item"
+            v-for="pilot in starshipDetails.pilots_detail"
+            :key="pilot.url"
+          >
+            {{ pilot.name }}
+          </div>
+          <div v-if="starshipDetails.pilots_detail.length === 0">
+            <span class="pilot-item">No Pilot</span>
           </div>
         </div>
       </div>

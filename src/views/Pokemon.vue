@@ -1,5 +1,8 @@
 <script setup>
 import { ref, reactive, onMounted, computed, defineAsyncComponent } from 'vue';
+import helpers from './helpers';
+import Loader from '../components/Loader.vue';
+import NotFound from '../components/NotFound.vue';
 
 const Details = defineAsyncComponent(() => import('../components/DetailsPokemon.vue'));
 
@@ -7,34 +10,37 @@ const baseUrl = 'https://pokeapi.co/api/v2/pokemon/'
 const data = reactive({});
 const pokemonList = ref([]);
 const pokemonName = ref('');
-
-const isFound = computed(() => {
-  return pokemonList.value.length > 0;
-})
+const isFetch = ref(false);
+const isNotFound = ref(false);
 
 onMounted( async() => {
   await getPokemon(baseUrl);
 });
 
 async function getPokemon(url) {
+  isFetch.value = true;
+  isNotFound.value = false;
+
   await fetch(url, {
     method: 'GET'
   }).then( async(res) => {
+    isFetch.value = false;
     data.value = await res.json();
     data.value.results.forEach(pokemon => {
       pokemonList.value.push(pokemon);
     });
 
-    if (hasSpace()) {
-      getOtherPokemon();
+    if (data.value.results.length === 0) {
+      isNotFound.value = true;
+    } else {
+      if (helpers.hasSpace()) {
+        getOtherPokemon();
+      }
     }
-  }).catch((err) => {
-    pokemonList.value = [];
-  })
-}
 
-function hasSpace() {
-  return document.body.scrollHeight <= window.innerHeight;
+  }).catch((err) => {
+    isFetch.value = false;
+  })
 }
 
 function getOtherPokemon() {
@@ -54,11 +60,16 @@ window.onscroll = () => {
 }
 
 const isShowDetail = ref(false);
-const selectedPokemon = reactive({});
+const pokemonDetails = reactive({});
 
-function getDetail(pokemon) {
-  isShowDetail.value = true;
-  selectedPokemon.value = pokemon;
+async function getDetail(pokemon) {
+  await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}/`, {
+    method: 'GET'
+  }).then( async(res) => {
+    let response = await res.json();
+    pokemonDetails.value = response;
+    isShowDetail.value = true;
+  }).catch();
 }
 
 function hideDetail() {
@@ -70,13 +81,23 @@ async function searchPokemon() {
     pokemonList.value = [];
     await getPokemon(baseUrl);
   } else {
+    isFetch.value = true;
+    isNotFound.value = false;
+
     await fetch(`${baseUrl}${pokemonName.value.toLocaleLowerCase()}/`, {
       method: 'GET'
     }).then( async(res) => {
+      isFetch.value = false;
       const response = await res.json();
       pokemonList.value = [];
       pokemonList.value.push(response);
+
+      if (pokemonList.value.length === 0) {
+        isNotFound.value = true;
+      }
     }).catch((err) => {
+      isFetch.value = false;
+      isNotFound.value = true;
       pokemonList.value = [];
     })
   }
@@ -116,16 +137,17 @@ function eventEnter(event) {
         <div>{{ pokemon.name }}</div>
       </div>
     </div>
-    <div
-      v-if="!isFound"
-      class="not-found"
-    >
-      &#9888; Pokemon Not Found &#9888;
-    </div>
+
+    <Loader v-if="isFetch" />
+
+    <NotFound
+      v-if="isNotFound"
+      api="Pokemon"
+    />
 
     <Details
       v-if="isShowDetail"
-      :pokemon="selectedPokemon.value"
+      :pokemon="pokemonDetails.value"
       @close="hideDetail"
     />
   </div>

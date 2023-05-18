@@ -13,7 +13,6 @@ const title = computed(() => {
 
 function showSidebar() {
   isShowSidebar.value = true;
-  console.log();
 };
 
 function hideSidebar() { isShowSidebar.value = false };
