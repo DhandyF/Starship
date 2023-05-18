@@ -1,11 +1,13 @@
 <script setup>
 import { ref, reactive, onMounted, computed, defineAsyncComponent } from 'vue';
+import { useStore } from 'vuex';
 import Loader from '../components/Loader.vue';
 import NotFound from '../components/NotFound.vue';
 import helpers from './helpers';
 
 const Details = defineAsyncComponent(() => import('../components/DetailsStarship.vue'));
 
+const store = useStore();
 const baseUrl = 'https://swapi.dev/api/starships/'
 const data = reactive({});
 const starshipList = ref([]);
@@ -57,6 +59,7 @@ async function searchStarship() {
     starshipList.value = [];
     await getStarship(baseUrl);
   } else {
+    store.dispatch('addStarshipHistory', starshipName.value);
     isFetch.value = true;
     isNotFound.value = false;
 
@@ -168,6 +171,8 @@ function hideDetail() {
 function eventEnter(event) {
   if (event.key === 'Enter') {
     searchStarship();
+    let elInput = document.getElementById('search-id');
+    elInput.blur();
   }
 }
 
@@ -179,17 +184,55 @@ window.onscroll = () => {
     getOtherStarship();
   }
 }
+
+function showHistory(e) {
+  const elInput = document.getElementById('input-starship');
+  let searchHistory = store.getters.getStarshipHistory;
+
+  let elHistory = document.createElement('DIV');
+  elHistory.setAttribute('id', 'history-list');
+  elHistory.setAttribute('class', 'history-items');
+  elHistory.style.position = 'absolute';
+  elHistory.style.border = '1px solid grey';
+  elHistory.style.width = '30%';
+  elHistory.style.minWidth = '150px';
+
+  elInput.appendChild(elHistory);
+  searchHistory.forEach(history => {
+    let elHisItem = document.createElement('DIV');
+    elHisItem.setAttribute('class', 'history');
+    elHisItem.style.height = '30px';
+    elHisItem.style.minWidth = '150px';
+    elHisItem.style.padding = '5px 10px';
+    elHisItem.style.cursor = 'pointer';
+    elHisItem.style.backgroundColor = 'white';
+    elHisItem.innerHTML = history;
+    elHisItem.innerHTML += "<input type='hidden' value='" + history + "'>";
+
+    elHistory.appendChild(elHisItem);
+  });
+}
+
+function closeHistory(e) {
+  let elInput = document.getElementById('input-starship');
+  let elHistory = document.getElementById("history-list");
+  
+  elInput.removeChild(elHistory)
+}
 </script>
 
 <template>
   <div class="container">
-    <div class="search">
+    <div id="input-starship" class="search">
       <input
+        id="search-id"
         class="search-field"
         type="text"
         v-model="starshipName"
         placeholder="Find your Starship"
         @keyup="eventEnter"
+        @focus="showHistory"
+        @blur="closeHistory"
       >
       <button
         class="search-btn"
