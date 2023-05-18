@@ -6,9 +6,17 @@ The starship list is taken from the public API [Starship](https://swapi.dev/api)
 
 ## Screenshot
 
+### Starship
+
 ![Starship](./src/assets/images/ss_starship.png)
 
 ![Detail](./src//assets/images/ss_starship_details.png)
+
+### Pokemon
+
+![Pokemon](./src/assets/images/ss_pokemon.png)
+
+![Detail](./src/assets/images/ss_pokemon_details.png)
 
 ## Project Setup
 
