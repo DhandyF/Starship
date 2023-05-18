@@ -39,6 +39,7 @@ async function getStarship(url) {
     }
   }).catch((err) => {
     isFetch.value = false;
+    alert('Failed to load data!');
   })
 }
 
@@ -75,6 +76,8 @@ async function searchStarship() {
       }
     }).catch((err) => {
       isFetch.value = false;
+      console.log(err);
+      alert('Failed to load data!');
     })
   }
 }
@@ -106,7 +109,9 @@ async function getDetail(starship) {
     }
 
     isShowDetail.value = true;
-  }).catch();
+  }).catch(() => {
+    alert('Failed to get details starship!');
+  });
 }
 
 const isFetchFilms = ref(false);
@@ -124,7 +129,9 @@ async function getFilms(arrayFilm) {
       if (films.length === arrayFilm.length) {
         isFetchFilms.value = false;
       }
-    }).catch();
+    }).catch(() => {
+      alert('Failed to get films!');
+    });
   });
 
   return films;
@@ -146,7 +153,9 @@ async function getPilots(arrayPilot) {
       if (pilots.length === arrayPilot.length) {
         isFetchPilots.value = false;
       }
-    }).catch();
+    }).catch(() => {
+      alert('Failed to get pilots!');
+    });
   });
 
   return pilots;

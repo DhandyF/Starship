@@ -40,6 +40,7 @@ async function getPokemon(url) {
 
   }).catch((err) => {
     isFetch.value = false;
+    alert('Failed to load data!');
   })
 }
 
@@ -69,7 +70,9 @@ async function getDetail(pokemon) {
     let response = await res.json();
     pokemonDetails.value = response;
     isShowDetail.value = true;
-  }).catch();
+  }).catch(() => {
+    alert('Failed to get details pokemon!');
+  });
 }
 
 function hideDetail() {
@@ -97,8 +100,12 @@ async function searchPokemon() {
       }
     }).catch((err) => {
       isFetch.value = false;
-      isNotFound.value = true;
-      pokemonList.value = [];
+      if (err.message.includes('Not Found')) {
+        isNotFound.value = true;
+        pokemonList.value = [];
+      } else {
+        alert('Failed to load data!');
+      }
     })
   }
 }
