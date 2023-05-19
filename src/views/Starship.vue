@@ -19,6 +19,10 @@ onMounted( async() => {
   await getStarship(baseUrl);
 });
 
+const historySearch = computed(() => {
+  return store.getters.getStarshipHistory;
+});
+
 async function getStarship(url) {
   isFetch.value = true;
   isNotFound.value = false;
@@ -173,6 +177,7 @@ function eventEnter(event) {
     searchStarship();
     let elInput = document.getElementById('search-id');
     elInput.blur();
+    closeHistory();
   }
 }
 
@@ -185,39 +190,31 @@ window.onscroll = () => {
   }
 }
 
-function showHistory(e) {
-  const elInput = document.getElementById('input-starship');
-  let searchHistory = store.getters.getStarshipHistory;
-
-  let elHistory = document.createElement('DIV');
-  elHistory.setAttribute('id', 'history-list');
-  elHistory.setAttribute('class', 'history-items');
-  elHistory.style.position = 'absolute';
-  elHistory.style.border = '1px solid grey';
-  elHistory.style.width = '30%';
-  elHistory.style.minWidth = '150px';
-
-  elInput.appendChild(elHistory);
-  searchHistory.forEach(history => {
-    let elHisItem = document.createElement('DIV');
-    elHisItem.setAttribute('class', 'history');
-    elHisItem.style.height = '30px';
-    elHisItem.style.minWidth = '150px';
-    elHisItem.style.padding = '5px 10px';
-    elHisItem.style.cursor = 'pointer';
-    elHisItem.style.backgroundColor = 'white';
-    elHisItem.innerHTML = history;
-    elHisItem.innerHTML += "<input type='hidden' value='" + history + "'>";
-
-    elHistory.appendChild(elHisItem);
-  });
+function selectSuggestion(history) {
+  starshipName.value = history;
+  searchStarship();
+  closeHistory();
 }
 
-function closeHistory(e) {
-  let elInput = document.getElementById('input-starship');
-  let elHistory = document.getElementById("history-list");
-  
-  elInput.removeChild(elHistory)
+function showHistory() {
+  let elHistory = document.getElementById('history');
+  elHistory.style.display = 'block';
+}
+
+function closeHistory() {
+  let elHistory = document.getElementById('history');
+  elHistory.style.display = 'none';
+}
+
+function checkClickEvent() {
+  window.onclick = (event) => {
+    console.log(event.target.className);
+    if (event.target.className !== 'history-item'
+      && event.target.className !== 'search-field'
+    ) {
+      closeHistory();
+    }
+  }
 }
 </script>
 
@@ -232,8 +229,18 @@ function closeHistory(e) {
         placeholder="Find your Starship"
         @keyup="eventEnter"
         @focus="showHistory"
-        @blur="closeHistory"
+        @blur="checkClickEvent"
       >
+      <div id="history">
+        <div
+          class="history-item"
+          v-for="history in historySearch"
+          :key="history"
+          @click="selectSuggestion(history)"
+        >
+          {{ history }}
+        </div>
+      </div>
       <button
         class="search-btn"
         @click="searchStarship"
@@ -356,5 +363,32 @@ function closeHistory(e) {
   box-shadow: 0px 0px 15px 2px rgba(191,240,245,1);
   -webkit-box-shadow: 0px 0px 15px 2px rgba(191,240,245,1);
   -moz-box-shadow: 0px 0px 15px 2px rgba(191,240,245,1);
+}
+
+#history {
+  display: none;
+  position: absolute;
+  max-height: 300px;
+  width: fit-content;
+  max-width: 400px;
+  min-width: 150px;
+  margin: 0 10px 0 0;
+  overflow-y: auto;
+  border-radius: 3px;
+  background-color: white;
+}
+
+.history-item {
+  display: flex;
+  height: 30px;
+  padding: 0 10px;
+  align-items: center;
+  color: grey;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  color: black;
+  background-color: rgb(206, 206, 206);
 }
 </style>
